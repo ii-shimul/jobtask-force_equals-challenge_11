@@ -43,6 +43,28 @@ async function run() {
 				res.status(401).json({ message: "Invalid credentials" });
 			}
 		});
+		// GET /accounts
+		app.get("/accounts", async (req, res) => {
+			const companies = await companiesCollection.find().toArray();
+			res.json(companies);
+		});
+
+		// POST /accounts/:id/status
+		app.post("/accounts/:id/status", async (req, res) => {
+			const { id } = req.params;
+			const { status } = req.body;
+
+			const result = await companiesCollection.updateOne(
+				{ _id: new ObjectId(id) },
+				{ $set: { status } }
+			);
+
+			if (result.modifiedCount > 0) {
+				res.json({ message: "Status updated successfully" });
+			} else {
+				res.status(404).json({ message: "Company not found" });
+			}
+		});
 	} finally {
 		// await client.close();
 	}
