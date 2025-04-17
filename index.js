@@ -23,9 +23,26 @@ const client = new MongoClient(uri, {
 
 async function run() {
 	try {
+		await client.connect();
 		console.log(
 			"Pinged your deployment. You successfully connected to MongoDB!"
 		);
+
+		const db = client.db("force_equals-challenge_1");
+		const usersCollection = db.collection("users");
+		const companiesCollection = db.collection("companies");
+
+		// POST /login
+		app.post("/login", async (req, res) => {
+			const { username, password } = req.body;
+			const user = await usersCollection.findOne({ username, password });
+
+			if (user) {
+				res.json({ message: "Login successful", token: "xyz" });
+			} else {
+				res.status(401).json({ message: "Invalid credentials" });
+			}
+		});
 	} finally {
 		// await client.close();
 	}
@@ -38,5 +55,5 @@ app.get("/", (req, res) => {
 });
 
 app.listen(port, () => {
-	console.log("Server is running...");
+	console.log(`Server is running on port ${port}`);
 });
